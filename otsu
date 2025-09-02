@@ -1,0 +1,52 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load grayscale image
+img = cv2.imread("img.png", cv2.IMREAD_GRAYSCALE)
+
+# Step 1: Compute histogram
+hist = np.zeros(256)
+rows, cols = img.shape
+for i in range(rows):
+    for j in range(cols):
+        hist[img[i, j]] += 1
+
+# Normalize histogram to get probability distribution
+total_pixels = rows * cols
+prob = hist / total_pixels
+
+# Step 2: Compute Otsu’s threshold
+max_between_var = 0
+otsu_thresh = 0
+
+for t in range(256):
+    # Class probabilities
+    w0 = np.sum(prob[:t])      # background weight
+    w1 = np.sum(prob[t:])      # foreground weight
+    
+    if w0 == 0 or w1 == 0:
+        continue  # skip invalid cases
+    
+    # Class means
+    mu0 = np.sum([i * prob[i] for i in range(0, t)]) / w0
+    mu1 = np.sum([i * prob[i] for i in range(t, 256)]) / w1
+    
+    # Between-class variance
+    between_var = w0 * w1 * (mu0 - mu1) ** 2
+    
+    # Check for max variance
+    if between_var > max_between_var:
+        max_between_var = between_var
+        otsu_thresh = t
+
+print("Optimal Otsu Threshold:", otsu_thresh)
+
+# Step 3: Apply threshold to binarize image
+binary_img = np.zeros_like(img)
+binary_img[img >= otsu_thresh] = 255
+
+# Show results
+plt.subplot(1,2,1), plt.imshow(img, cmap='gray'), plt.title("Original")
+plt.subplot(1,2,2), plt.imshow(binary_img, cmap='gray'), plt.title("Otsu Binarized")
+plt.show()
