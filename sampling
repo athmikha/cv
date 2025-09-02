@@ -1,0 +1,46 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Read image in grayscale
+img = cv2.imread("your_image.jpg", cv2.IMREAD_GRAYSCALE)
+rows, cols = img.shape
+
+# --------- 1. Sampling (reduce resolution) ---------
+def sampling(image, factor):
+    # Take every 'factor'-th pixel (downsampling)
+    sampled = image[::factor, ::factor]
+    return sampled
+
+# --------- 2. Quantization (reduce gray levels) ---------
+def quantization(image, levels):
+    # Normalize to [0,1]
+    norm_img = image / 255.0
+    # Scale to levels
+    quantized = np.floor(norm_img * (levels-1))
+    # Rescale back to [0,255]
+    quantized = (quantized / (levels-1)) * 255
+    return quantized.astype(np.uint8)
+
+# Apply Sampling
+sampled_img = sampling(img, 4)   # take every 4th pixel (reduces resolution)
+
+# Apply Quantization
+quantized_img = quantization(img, 4)  # reduce to 4 gray levels
+
+# Display results
+plt.figure(figsize=(12,6))
+
+plt.subplot(1,3,1)
+plt.title("Original Image")
+plt.imshow(img, cmap='gray')
+
+plt.subplot(1,3,2)
+plt.title("Sampled (factor=4)")
+plt.imshow(sampled_img, cmap='gray')
+
+plt.subplot(1,3,3)
+plt.title("Quantized (4 levels)")
+plt.imshow(quantized_img, cmap='gray')
+
+plt.show()
