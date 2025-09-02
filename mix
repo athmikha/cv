@@ -1,0 +1,62 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load grayscale images
+img1 = cv2.imread("img1.png", cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread("img2.png", cv2.IMREAD_GRAYSCALE)
+
+# -------------------------------
+# 1. Log Transformation
+# -------------------------------
+c = 255 / np.log(1 + np.max(img1))   # scaling constant
+log_transform = c * np.log(1 + img1.astype(np.float32))
+log_transform = np.uint8(np.clip(log_transform, 0, 255))
+
+# -------------------------------
+# 2. Power Law (Gamma) Transformation
+# -------------------------------
+gamma = 0.5   # try values <1 (brighten), >1 (darken)
+c = 1
+power_law = c * np.power(img1.astype(np.float32) / 255.0, gamma) * 255
+power_law = np.uint8(np.clip(power_law, 0, 255))
+
+# -------------------------------
+# 3. Arithmetic Operations
+# -------------------------------
+# Ensure both images are same size
+img2_resized = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
+
+add_img  = np.clip(img1.astype(int) + img2_resized.astype(int), 0, 255).astype(np.uint8)
+sub_img  = np.clip(img1.astype(int) - img2_resized.astype(int), 0, 255).astype(np.uint8)
+mul_img  = np.clip(img1.astype(int) * img2_resized.astype(int), 0, 255).astype(np.uint8)
+div_img  = np.clip(img1.astype(float) / (img2_resized.astype(float) + 1) * 255, 0, 255).astype(np.uint8)
+
+# -------------------------------
+# 4. Logical Operations
+# -------------------------------
+and_img = np.bitwise_and(img1, img2_resized)
+or_img  = np.bitwise_or(img1, img2_resized)
+xor_img = np.bitwise_xor(img1, img2_resized)
+not_img = np.bitwise_not(img1)   # only one image needed
+
+# -------------------------------
+# Show Results
+# -------------------------------
+titles = ["Original", "Log Transform", "Power Law", 
+          "Add", "Subtract", "Multiply", "Divide",
+          "AND", "OR", "XOR", "NOT"]
+
+images = [img1, log_transform, power_law, 
+          add_img, sub_img, mul_img, div_img,
+          and_img, or_img, xor_img, not_img]
+
+plt.figure(figsize=(15,10))
+for i in range(len(images)):
+    plt.subplot(3,4,i+1)
+    plt.imshow(images[i], cmap="gray")
+    plt.title(titles[i])
+    plt.axis("off")
+
+plt.tight_layout()
+plt.show()
