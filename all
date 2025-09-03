@@ -9,6 +9,7 @@ print(df)
 
 # Print first 5 rows (optional)
 print(df.head())
+## for numerical mapping df["target"] = df["target"].map({"No": 0, "Yes": 1})
 
 
 import numpy as np
