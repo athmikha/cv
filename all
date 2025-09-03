@@ -1,3 +1,16 @@
+
+import pandas as pd
+
+# Read the CSV file
+df = pd.read_csv("your_file.csv")
+
+# Print the entire content
+print(df)
+
+# Print first 5 rows (optional)
+print(df.head())
+
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
